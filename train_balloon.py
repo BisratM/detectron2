@@ -41,6 +41,7 @@ from detectron2.structures import BoxMode
 import itertools
 from detectron2.data import DatasetCatalog, MetadataCatalog
 import numpy as np
+import cv2 
 
 class Trainer(DefaultTrainer):
     """
