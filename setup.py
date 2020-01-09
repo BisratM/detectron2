@@ -124,7 +124,7 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "termcolor>=1.1",
-        "Pillow>=6.0",
+        "Pillow==6.2.2",  # torchvision currently does not work with Pillow 7
         "yacs>=0.1.6",
         "tabulate",
         "cloudpickle",
@@ -133,7 +133,10 @@ setup(
         "tensorboard",
         "fvcore",
     ],
-    extras_require={"all": ["shapely", "psutil"], "dev": ["flake8", "isort", "black==19.3b0"]},
+    extras_require={
+        "all": ["shapely", "psutil"],
+        "dev": ["flake8", "isort", "black==19.3b0", "flake8-bugbear", "flake8-comprehensions"],
+    },
     ext_modules=get_extensions(),
     cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},
 )
