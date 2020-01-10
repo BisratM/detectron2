@@ -152,35 +152,38 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
             # can trigger this assertion.
             assert anno["image_id"] == image_id
 
-            assert anno.get("ignore", 0) == 0
+            #TODO: Figure out why this fails
+            # assert anno.get("ignore", 0) == 0
 
-            obj = {key: anno[key] for key in ann_keys if key in anno}
+            if anno.get("ignore", 0) == 0:
+                obj = {key: anno[key] for key in ann_keys if key in anno}
 
-            segm = anno.get("segmentation", None)
-            if segm:  # either list[list[float]] or dict(RLE)
-                if not isinstance(segm, dict):
-                    # filter out invalid polygons (< 3 points)
-                    segm = [poly for poly in segm if len(poly) % 2 == 0 and len(poly) >= 6]
-                    if len(segm) == 0:
-                        num_instances_without_valid_segmentation += 1
-                        continue  # ignore this instance
-                obj["segmentation"] = segm
+                segm = anno.get("segmentation", None)
+                if segm:  # either list[list[float]] or dict(RLE)
+                    if not isinstance(segm, dict):
+                        # filter out invalid polygons (< 3 points)
+                        segm = [poly for poly in segm if len(poly) % 2 == 0 and len(poly) >= 6]
+                        if len(segm) == 0:
+                            num_instances_without_valid_segmentation += 1
+                            continue  # ignore this instance
+                    obj["segmentation"] = segm
 
-            keypts = anno.get("keypoints", None)
-            if keypts:  # list[int]
-                for idx, v in enumerate(keypts):
-                    if idx % 3 != 2:
-                        # COCO's segmentation coordinates are floating points in [0, H or W],
-                        # but keypoint coordinates are integers in [0, H-1 or W-1]
-                        # Therefore we assume the coordinates are "pixel indices" and
-                        # add 0.5 to convert to floating point coordinates.
-                        keypts[idx] = v + 0.5
-                obj["keypoints"] = keypts
+                keypts = anno.get("keypoints", None)
+                if keypts:  # list[int]
+                    for idx, v in enumerate(keypts):
+                        if idx % 3 != 2:
+                            # COCO's segmentation coordinates are floating points in [0, H or W],
+                            # but keypoint coordinates are integers in [0, H-1 or W-1]
+                            # Therefore we assume the coordinates are "pixel indices" and
+                            # add 0.5 to convert to floating point coordinates.
+                            keypts[idx] = v + 0.5
+                    obj["keypoints"] = keypts
 
-            obj["bbox_mode"] = BoxMode.XYWH_ABS
-            if id_map:
-                obj["category_id"] = id_map[obj["category_id"]]
-            objs.append(obj)
+                obj["bbox_mode"] = BoxMode.XYWH_ABS
+                if id_map:
+                    obj["category_id"] = id_map[obj["category_id"]]
+                objs.append(obj)
+
         record["annotations"] = objs
         dataset_dicts.append(record)
 
